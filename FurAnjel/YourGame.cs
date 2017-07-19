@@ -28,6 +28,10 @@ namespace FurAnjel
             BallMove = new Vector2(Backend.Window.Width/ 2 - 25, Backend.Window.Height / 2 - 25);
             Random random = new Random();
             BallVelocity = new Vector2((float)random.NextDouble() * 300 - 150, (float)random.NextDouble() * 300 - 150);
+            if (Math.Abs(BallVelocity.X) < 50)
+            {
+                BallVelocity.X = 75;
+            }
             // TODO: Load anything you need!
 
             // listen to mouse movement
@@ -51,6 +55,7 @@ namespace FurAnjel
         public Vector2 BallMove = Vector2.Zero;
         public Vector2 BallVelocity = Vector2.Zero;
         public float PaddleMove = 0;
+        public Random SpeedChange = new Random();
 
         /// <summary>
         /// Update logic here.
@@ -72,24 +77,26 @@ namespace FurAnjel
             }
             if (BallMove.Y > PaddleMove)
             {
-                PaddleMove += (float)delta * 50;
+                PaddleMove += (float)delta * 150;
 
             }
             else
             {
-                PaddleMove -= (float)delta * 50;
+                PaddleMove -= (float)delta * 150;
 
             }
             if(BallMove.X < 75 && BallMove.X > 0 && BallMove.Y < MouseCoords.Y + 75 && BallMove.Y > MouseCoords.Y - 75)
             {
                 BallMove.X = 75;
                 BallVelocity.X = -BallVelocity.X;
+                BallVelocity *= (float)SpeedChange.NextDouble() + 1;
 
             }
             if(BallMove.X < Backend.Window.Width && BallMove.X > Backend.Window.Width - 125 && BallMove.Y < PaddleMove + 75 && BallMove.Y > PaddleMove - 75)
             {
                BallMove.X = Backend.Window.Width - 125;
                 BallVelocity.X = -BallVelocity.X;
+                BallVelocity *= (float)SpeedChange.NextDouble() + 1;
             }
 
             // TODO: Move objects around.
