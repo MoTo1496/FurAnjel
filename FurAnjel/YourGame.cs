@@ -25,17 +25,76 @@ namespace FurAnjel
         /// </summary>
         public void Load()
         {
-            BallMove = new Vector2(Backend.Window.Width/ 2 - 25, Backend.Window.Height / 2 - 25);
-            Random random = new Random();
-            BallVelocity = new Vector2((float)random.NextDouble() * 300 - 150, (float)random.NextDouble() * 300 - 150);
-            if (Math.Abs(BallVelocity.X) < 50)
-            {
-                BallVelocity.X = 75;
-            }
             // TODO: Load anything you need!
 
             // listen to mouse movement
             Backend.Window.MouseMove += Window_MouseMove;
+            Backend.Window.KeyDown += Window_KeyDown;
+            Backend.Window.KeyUp += Window_KeyUp;
+            Backend.Window.Mouse.ButtonDown += Mouse_ButtonDown;
+            Backend.Window.Mouse.ButtonUp += Mouse_ButtonUp;
+        }
+
+        private void Mouse_ButtonUp(object sender, MouseButtonEventArgs e)
+        {
+        }
+
+        private void Mouse_ButtonDown(object sender, MouseButtonEventArgs e)
+        {
+        if (e.Button == MouseButton.Left)
+            {
+                Bullet bullet = new Bullet();
+                bullet.BulletPos = PlayerPos;
+                Vector2 relative = MouseCoords - PlayerPos;
+                relative.Normalize();
+                bullet.BulletVelocity = relative * 800;
+                Bullets.Add(bullet);
+            }
+        }
+
+        public List<Bullet> Bullets = new List<Bullet>();
+        public bool PressW, PressS, PressA, PressD;
+
+        private void Window_KeyUp(object sender, KeyboardKeyEventArgs e)
+        {
+            if (e.Key == Key.S)
+            {
+                PressS = false;
+
+            }
+            if (e.Key == Key.W)
+            {
+                PressW = false;
+            }
+            if (e.Key == Key.A)
+            {
+                PressA = false;
+            }
+            if (e.Key == Key.D)
+            {
+                PressD = false;
+            }
+        }
+
+        private void Window_KeyDown(object sender, KeyboardKeyEventArgs e)
+        {
+            if (e.Key == Key.S)
+            {
+                PressS = true;
+
+            }
+            if (e.Key == Key.W)
+            {
+                PressW = true;
+            }
+            if (e.Key == Key.A)
+            {
+                PressA = true;
+            }
+            if (e.Key == Key.D)
+            {
+                PressD = true;
+            }
         }
 
         /// <summary>
@@ -52,53 +111,34 @@ namespace FurAnjel
         /// Stores current mouse coordinates.
         /// </summary>
         public Vector2 MouseCoords = Vector2.Zero;
-        public Vector2 BallMove = Vector2.Zero;
-        public Vector2 BallVelocity = Vector2.Zero;
-        public float PaddleMove = 0;
-        public Random SpeedChange = new Random();
-
+        public Vector2 PlayerPos = Vector2.Zero;
         /// <summary>
         /// Update logic here.
         /// </summary>
         /// <param name="delta"></param>
         public void Tick(double delta)
         {
-            BallMove += BallVelocity * (float)delta;
-            if (BallMove.Y < 0)
+            if (PressW)
             {
-                BallMove.Y = 0;
-                BallVelocity.Y = -BallVelocity.Y;
+                PlayerPos.Y -= (float)delta * 150;
             }
-            if (BallMove.Y > Backend.Window.Height - 50)
+            if (PressS)
             {
-                BallMove.Y = Backend.Window.Height - 50;
-                BallVelocity.Y = -BallVelocity.Y;
+                PlayerPos.Y += (float)delta * 150;
+            }
+            if (PressA)
+            {
+                PlayerPos.X -= (float)delta * 150;
 
             }
-            if (BallMove.Y > PaddleMove)
+            if (PressD)
             {
-                PaddleMove += (float)delta * 150;
-
+                PlayerPos.X += (float)delta * 150;
             }
-            else
+            foreach (Bullet bullet in Bullets)
             {
-                PaddleMove -= (float)delta * 150;
-
+                bullet.BulletPos += bullet.BulletVelocity * (float)delta;
             }
-            if(BallMove.X < 75 && BallMove.X > 0 && BallMove.Y < MouseCoords.Y + 75 && BallMove.Y > MouseCoords.Y - 75)
-            {
-                BallMove.X = 75;
-                BallVelocity.X = -BallVelocity.X;
-                BallVelocity *= (float)SpeedChange.NextDouble() + 1;
-
-            }
-            if(BallMove.X < Backend.Window.Width && BallMove.X > Backend.Window.Width - 125 && BallMove.Y < PaddleMove + 75 && BallMove.Y > PaddleMove - 75)
-            {
-               BallMove.X = Backend.Window.Width - 125;
-                BallVelocity.X = -BallVelocity.X;
-                BallVelocity *= (float)SpeedChange.NextDouble() + 1;
-            }
-
             // TODO: Move objects around.
         }
 
@@ -116,26 +156,28 @@ namespace FurAnjel
             // Configure a renderable
             GL.BindVertexArray(Backend.VBO_Box);
             GL.BindTexture(TextureTarget.Texture2D, Backend.Tex_Red_X);
-            Matrix4 model = Matrix4.CreateScale(50, 100, 1) * Matrix4.CreateTranslation(25, MouseCoords.Y - 50, 0);
+            Matrix4 model = Matrix4.CreateScale(20, 20, 1) * Matrix4.CreateTranslation(PlayerPos.X - 10, PlayerPos.Y - 10, 0);
             GL.UniformMatrix4(2, false, ref model);
-
-            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
-
-            GL.BindVertexArray(Backend.VBO_Box);
-            GL.BindTexture(TextureTarget.Texture2D, Backend.Tex_Red_X);
-             model = Matrix4.CreateScale(50, 100, 1) * Matrix4.CreateTranslation( Backend.Window.Width - 75, PaddleMove - 50, 0);
-            GL.UniformMatrix4(2, false, ref model);
-
-            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
-
-            GL.BindVertexArray(Backend.VBO_Box);
-            GL.BindTexture(TextureTarget.Texture2D, Backend.Tex_Red_X);
-            model = Matrix4.CreateScale(50, 50, 1) * Matrix4.CreateTranslation(BallMove.X, BallMove.Y, 0);
-            GL.UniformMatrix4(2, false, ref model);
-
-
             // Render it
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+
+            GL.BindVertexArray(Backend.VBO_Box);
+            GL.BindTexture(TextureTarget.Texture2D, Backend.Tex_Red_X);
+            model = Matrix4.CreateScale(4, 4, 1) * Matrix4.CreateTranslation( MouseCoords.X - 2, MouseCoords.Y - 2, 0);
+            GL.UniformMatrix4(2, false, ref model);
+            // Render it
+
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+
+            foreach (Bullet bullet in Bullets)
+            {
+                GL.BindVertexArray(Backend.VBO_Box);
+                GL.BindTexture(TextureTarget.Texture2D, Backend.Tex_Red_X);
+                model = Matrix4.CreateScale(4, 4, 1) * Matrix4.CreateTranslation(bullet.BulletPos.X - 2, bullet.BulletPos.Y - 2, 0);
+                GL.UniformMatrix4(2, false, ref model);
+                // Render it
+                GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+            }
         }
     }
 }
