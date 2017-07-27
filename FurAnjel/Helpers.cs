@@ -162,13 +162,13 @@ namespace FurAnjel
                 int tex = GL.GenTexture();
                 // Bind the texture as a 2D texture.
                 GL.BindTexture(TextureTarget.Texture2D, tex);
-                // Lock all the bits in the bitmap for external usage as ARGB.
+                // Lock all the bits in the bitmap for external usage as ARGB. (Which will then be reversed to BGRA)
                 BitmapData bmpdata = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
                     ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 // Upload the image to the texture, in 2D format, no mipmapping, RGBA texture format,
-                // size of the bitmap, no border, RGBA read format, 1 standard byte per pixel, from the bmp's locked data.
+                // size of the bitmap, no border, BGRA read format, 1 standard byte per pixel, from the bmp's locked data.
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp.Width, bmp.Height,
-                    0, OpenTK.Graphics.OpenGL4.PixelFormat.Rgba, PixelType.UnsignedByte, bmpdata.Scan0);
+                    0, OpenTK.Graphics.OpenGL4.PixelFormat.Bgra, PixelType.UnsignedByte, bmpdata.Scan0);
                 // Release the bits now that OpenGL controls the data.
                 bmp.UnlockBits(bmpdata);
                 // Set the parameter "min(ification) filter" to "linear",
