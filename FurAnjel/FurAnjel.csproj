@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bullet.cs" />
+    <Compile Include="Foe.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="GameInternal.cs" />
     <Compile Include="Program.cs" />

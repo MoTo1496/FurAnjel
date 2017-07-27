@@ -34,7 +34,7 @@ namespace FurAnjel
             // On the default display device (EG for multiple monitors),
             // OpenGL 4.3 (GLSL 430),
             // Forward-Compatibility mode of OpenGL (no backwards support!)
-            Window = new GameWindow(800, 600, GraphicsMode.Default, "Wow!",
+            Window = new GameWindow(800, 600, GraphicsMode.Default, "One Man Stand",
                 GameWindowFlags.FixedWindow, DisplayDevice.Default,
                 4, 3, GraphicsContextFlags.ForwardCompatible);
             // Add event when the window loads

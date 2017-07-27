@@ -41,7 +41,7 @@ namespace FurAnjel
 
         private void Mouse_ButtonDown(object sender, MouseButtonEventArgs e)
         {
-        if (e.Button == MouseButton.Left)
+            if (e.Button == MouseButton.Left)
             {
                 Bullet bullet = new Bullet();
                 bullet.BulletPos = PlayerPos;
@@ -50,10 +50,19 @@ namespace FurAnjel
                 bullet.BulletVelocity = relative * 800;
                 Bullets.Add(bullet);
             }
+            else if (e.Button == MouseButton.Right)
+            {
+                Foe foe = new Foe();
+                foe.FoePos = MouseCoords;
+                foe.FoeHP = 100;
+                Foes.Add(foe);
+            }
         }
 
         public List<Bullet> Bullets = new List<Bullet>();
         public bool PressW, PressS, PressA, PressD;
+
+        public List<Foe> Foes = new List<Foe>();
 
         private void Window_KeyUp(object sender, KeyboardKeyEventArgs e)
         {
@@ -139,6 +148,31 @@ namespace FurAnjel
             {
                 bullet.BulletPos += bullet.BulletVelocity * (float)delta;
             }
+            foreach (Foe foe in Foes)
+            {
+                Vector2 relative = PlayerPos - foe.FoePos;
+                relative.Normalize();
+                foe.FoePos += relative * (float)delta * 150;
+            }
+            for (int j = Bullets.Count - 1; j >= 0; j--)
+            {
+                Bullet bullet = Bullets[j];
+                for (int i = Foes.Count - 1; i >= 0; i--)
+                {
+                    Foe foe = Foes[i];
+                    if ((bullet.BulletPos - foe.FoePos).Length < 20)
+                    {
+                        foe.FoeHP -= 20;
+                        if (foe.FoeHP <= 0)
+                        {
+                            Foes.RemoveAt(i);
+                           
+                        }
+                        Bullets.RemoveAt(j);
+                        break;
+                    }
+                }
+            }
             // TODO: Move objects around.
         }
 
@@ -174,6 +208,15 @@ namespace FurAnjel
                 GL.BindVertexArray(Backend.VBO_Box);
                 GL.BindTexture(TextureTarget.Texture2D, Backend.Tex_Red_X);
                 model = Matrix4.CreateScale(4, 4, 1) * Matrix4.CreateTranslation(bullet.BulletPos.X - 2, bullet.BulletPos.Y - 2, 0);
+                GL.UniformMatrix4(2, false, ref model);
+                // Render it
+                GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+            }
+            foreach (Foe foe in Foes)
+            {
+                GL.BindVertexArray(Backend.VBO_Box);
+                GL.BindTexture(TextureTarget.Texture2D, Backend.Tex_Red_X);
+                model = Matrix4.CreateScale(20, 20, 1) * Matrix4.CreateTranslation(foe.FoePos.X - 10, foe.FoePos.Y - 10, 0);
                 GL.UniformMatrix4(2, false, ref model);
                 // Render it
                 GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
