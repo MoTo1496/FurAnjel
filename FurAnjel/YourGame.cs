@@ -121,6 +121,7 @@ namespace FurAnjel
         /// </summary>
         public Vector2 MouseCoords = Vector2.Zero;
         public Vector2 PlayerPos = Vector2.Zero;
+        public double PlayerHP = 100;
         /// <summary>
         /// Update logic here.
         /// </summary>
@@ -153,6 +154,16 @@ namespace FurAnjel
                 Vector2 relative = PlayerPos - foe.FoePos;
                 relative.Normalize();
                 foe.FoePos += relative * (float)delta * 150;
+                if ((foe.FoePos - PlayerPos).Length < 20)
+                {
+                    PlayerHP -= 5 * delta;
+                    Console.WriteLine(PlayerHP);
+                    if (PlayerHP <= 0)
+                    {
+                        Backend.Window.Close();
+                    }
+                }
+
             }
             for (int j = Bullets.Count - 1; j >= 0; j--)
             {
